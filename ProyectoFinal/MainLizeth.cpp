@@ -560,14 +560,14 @@ int main()
 
 		//MarcoPuerta
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(5.5f, 0.0f, 10.2f));
+		model = glm::translate(model, glm::vec3(5.2f, 0.0f, 10.3f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "activaTransparencia"), 0);
 		MarcoPuerta.Draw(lightingShader);
 
 		//Puerta
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(4.0f, 0.0f, 10.3f));
+		model = glm::translate(model, glm::vec3(4.12f, 0.0f, 10.4f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "activaTransparencia"), 0);
 		Puerta.Draw(lightingShader);

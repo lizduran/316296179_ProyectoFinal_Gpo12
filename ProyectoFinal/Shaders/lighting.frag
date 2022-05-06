@@ -87,7 +87,7 @@ void main( )
     result += CalcSpotLight( spotLight, norm, FragPos, viewDir );
     
 	
-    color = vec4( result,texture( material.diffuse, TexCoords).rgb );
+    color = vec4(colorAlpha)*vec4( result,texture(material.diffuse, TexCoords).rgb );
 	  if(color.a < 0.1 && trans>0 && activaTransparencia == 1)
         discard;
 }
@@ -145,7 +145,7 @@ vec3 CalcPointLight( PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir )
   /* vec4 result= vec4(ambient + diffuse + specular,texture( material.diffuse, TexCoords).rgb) ;
 	  if(result.a < 0.1)
         discard;*/
-     	vec3 result=ambient + diffuse + specular;
+    vec3 result=ambient + diffuse + specular;
 
     return (result);
     
@@ -185,7 +185,7 @@ vec3 CalcSpotLight( SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir )
 	  if(result.a < 0.1)
         discard;*/
 
-      	vec3 result=ambient + diffuse + specular;
+    vec3 result=ambient + diffuse + specular;
 
     return (result);
     

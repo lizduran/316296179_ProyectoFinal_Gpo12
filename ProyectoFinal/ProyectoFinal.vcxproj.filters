@@ -33,6 +33,12 @@
     <None Include="Shaders\modelLoading.vs">
       <Filter>Archivos de origen</Filter>
     </None>
+    <None Include="Shaders\anim.frag">
+      <Filter>Archivos de origen</Filter>
+    </None>
+    <None Include="Shaders\anim.vs">
+      <Filter>Archivos de origen</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesh.h">

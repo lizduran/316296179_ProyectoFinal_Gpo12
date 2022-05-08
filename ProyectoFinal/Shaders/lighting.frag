@@ -50,7 +50,6 @@ struct SpotLight
 in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoords;
-in float trans;
 
 out vec4 color;
 
@@ -59,9 +58,6 @@ uniform DirLight dirLight;
 uniform PointLight pointLights[NUMBER_OF_POINT_LIGHTS];
 uniform SpotLight spotLight;
 uniform Material material;
-uniform int activaTransparencia;
-uniform vec4 colorAlpha;
-
 
 // Function prototypes
 vec3 CalcDirLight( DirLight light, vec3 normal, vec3 viewDir );
@@ -87,8 +83,8 @@ void main( )
     result += CalcSpotLight( spotLight, norm, FragPos, viewDir );
     
 	
-    color = vec4(colorAlpha)*vec4( result,texture(material.diffuse, TexCoords).rgb );
-	  if(color.a < 0.1 && trans>0 && activaTransparencia == 1)
+    color = vec4( result,texture( material.diffuse, TexCoords).a );
+	  if(color.a < 0.1)
         discard;
 }
 
@@ -142,10 +138,10 @@ vec3 CalcPointLight( PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir )
     diffuse *= attenuation;
     specular *= attenuation;
 
-  /* vec4 result= vec4(ambient + diffuse + specular,texture( material.diffuse, TexCoords).rgb) ;
+  /* vec4 result= vec4(ambient + diffuse + specular,texture( material.diffuse, TexCoords).a) ;
 	  if(result.a < 0.1)
         discard;*/
-    vec3 result=ambient + diffuse + specular;
+     	vec3 result=ambient + diffuse + specular;
 
     return (result);
     
@@ -185,7 +181,7 @@ vec3 CalcSpotLight( SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir )
 	  if(result.a < 0.1)
         discard;*/
 
-    vec3 result=ambient + diffuse + specular;
+      	vec3 result=ambient + diffuse + specular;
 
     return (result);
     

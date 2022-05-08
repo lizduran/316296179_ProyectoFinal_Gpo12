@@ -23,14 +23,12 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Model.h"
-#include "Texture.h"
-#include "modelAnim.h"
+
 
 // Function prototypes
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 void DoMovement();
-void animacion();
 
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
@@ -42,113 +40,42 @@ GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
 bool keys[1024];
 bool firstMouse = true;
-float range = 0.0f;
-float rot = 0.0f;
-float movCamera = 0.0f;
+
 
 // Light attributes
 glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
-glm::vec3 PosIni(0.0f, 0.0f, 0.0f);
+glm::vec3 PosIni(-95.0f, 0.0f, -45.0f);
 glm::vec3 lightDirection(0.0f, 0.0f, 0.0f);
 
 bool active;
+
+
+// Positions of the point lights
+glm::vec3 pointLightPositions[] = {
+	glm::vec3(0.7f,  0.2f,  2.0f),
+	glm::vec3(2.3f, -3.3f, -4.0f),
+	glm::vec3(-4.0f,  2.0f, -12.0f),
+	glm::vec3(0.0f,  0.0f, -3.0f)
+};
+
+glm::vec3 LightP1;
 
 
 // Deltatime
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 GLfloat lastFrame = 0.0f;  	// Time of last frame
 
-// Keyframes
-float posX = PosIni.x, posY = PosIni.y, posZ = PosIni.z, rotRodIzq = 0.0f;
-
-#define MAX_FRAMES 9
-int i_max_steps = 190;
-int i_curr_steps = 0;
-typedef struct _frame
-{
-	//Variables para GUARDAR Key Frames
-	float posX;		//Variable para PosicionX
-	float posY;		//Variable para PosicionY
-	float posZ;		//Variable para PosicionZ
-	float incX;		//Variable para IncrementoX
-	float incY;		//Variable para IncrementoY
-	float incZ;		//Variable para IncrementoZ
-	float rotRodIzq;
-	float rotInc;
-
-}FRAME;
-
-FRAME KeyFrame[MAX_FRAMES];
-int FrameIndex = 0;			//introducir datos
-bool play = false;
-int playIndex = 0;
-
-// Positions of the point lights
-glm::vec3 pointLightPositions[] = {
-	glm::vec3(posX,posY,posZ),
-	glm::vec3(0.0f,0.0f,0.0f),
-	glm::vec3(0.0f,0.0f,0.0f),
-	glm::vec3(0.0f,0.0f,0.0f)
-};
-
-glm::vec3 LightP1;
-
-
-
-
-void saveFrame(void)
-{
-
-	printf("posx %f\n", posX);
-
-	KeyFrame[FrameIndex].posX = posX;
-	KeyFrame[FrameIndex].posY = posY;
-	KeyFrame[FrameIndex].posZ = posZ;
-
-	KeyFrame[FrameIndex].rotRodIzq = rotRodIzq;
-
-
-	FrameIndex++;
-}
-
-void resetElements(void)
-{
-	posX = KeyFrame[0].posX;
-	posY = KeyFrame[0].posY;
-	posZ = KeyFrame[0].posZ;
-
-	rotRodIzq = KeyFrame[0].rotRodIzq;
-
-}
-
-void interpolation(void)
-{
-
-	KeyFrame[playIndex].incX = (KeyFrame[playIndex + 1].posX - KeyFrame[playIndex].posX) / i_max_steps;
-	KeyFrame[playIndex].incY = (KeyFrame[playIndex + 1].posY - KeyFrame[playIndex].posY) / i_max_steps;
-	KeyFrame[playIndex].incZ = (KeyFrame[playIndex + 1].posZ - KeyFrame[playIndex].posZ) / i_max_steps;
-
-	KeyFrame[playIndex].rotInc = (KeyFrame[playIndex + 1].rotRodIzq - KeyFrame[playIndex].rotRodIzq) / i_max_steps;
-
-}
-
-
-
-
 int main()
 {
 	// Init GLFW
 	glfwInit();
 
-
-
-
-	// Set all the required options for GLFW
-	/*(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);*/
+	//// Set all the required options for GLFW
+	//(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	//glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
 	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Proyecto Final LDG", nullptr, nullptr);
@@ -187,20 +114,18 @@ int main()
 
 	// OpenGL options
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	Shader lightingShader("Shaders/lighting.vs", "Shaders/lighting.frag");
 	Shader lampShader("Shaders/lamp.vs", "Shaders/lamp.frag");
-	//Shader SkyBoxshader("Shaders/SkyBox.vs", "Shaders/SkyBox.frag");
-	Shader animShader("Shaders/anim.vs", "Shaders/anim.frag");
 
 	
 	Model ParedA1((char*)"Models/Fachada/Pared1.obj");
+	Model ParedA1B((char*)"Models/Fachada/Pared1B.obj");
 	Model ParedA2((char*)"Models/Fachada/Pared2.obj");
 	Model ParedA3((char*)"Models/Fachada/Pared3.obj");
 	Model ParedA4((char*)"Models/Fachada/Pared4.obj");
 	Model Piso((char*)"Models/Fachada/Piso.obj");
+	Model Tejado((char*)"Models/Fachada/Techo.obj");
 	Model MarcoPuerta((char*)"Models/Puerta/MarcoPuerta.obj");
 	Model Puerta((char*)"Models/Puerta/Puerta.obj");
 	Model AlacenaFlotante((char*)"Models/Alacena/alacenaFlotante.obj");
@@ -210,24 +135,17 @@ int main()
 	Model Refrigerador((char*)"Models/Refrigerador/Refri.obj");
 	Model EstufaPeque((char*)"Models/Stove/EstufaPeque.obj");
 	Model Campana((char*)"Models/campanaCocina/Campana.obj");
+	Model AlacenaHorizontal((char*)"Models/Alacena/alacenaHorizontal.obj");
+	Model AlacenaVertical((char*)"Models/Alacena/alacenaVertical.obj");
+	Model Reloj((char*)"Models/Reloj/reloj.obj");
+	Model ManecillaReloj((char*)"Models/Reloj/manecilla.obj");
+	Model AlacenaCajones((char*)"Models/Alacena/AlacenaHoriCajones.obj");
+	Model AlacenaGrande((char*)"Models/Alacena/alacenaGrande.obj");
+	Model Ball((char*)"Models/Ball/playaBall.obj");
+	Model TejaEntrada((char*)"Models/Fachada/Entrada.obj");
 	
-	//Objeto traslucido
-	//Model objTras("Models/Cubo/Cube01.obj");
-
+	
 	// Build and compile our shader program
-
-	//Inicializaci�n de KeyFrames
-
-	for (int i = 0; i < MAX_FRAMES; i++)
-	{
-		KeyFrame[i].posX = 0;
-		KeyFrame[i].incX = 0;
-		KeyFrame[i].incY = 0;
-		KeyFrame[i].incZ = 0;
-		KeyFrame[i].rotRodIzq = 0;
-		KeyFrame[i].rotInc = 0;
-	}
-
 
 
 	// Set up vertex data (and buffer(s)) and attribute pointers
@@ -277,51 +195,6 @@ int main()
 		-0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f,     0.0f,  1.0f
 	};
 
-
-	GLfloat skyboxVertices[] = {
-		// Positions
-		-1.0f,  1.0f, -1.0f,
-		-1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f,  1.0f, -1.0f,
-		-1.0f,  1.0f, -1.0f,
-
-		-1.0f, -1.0f,  1.0f,
-		-1.0f, -1.0f, -1.0f,
-		-1.0f,  1.0f, -1.0f,
-		-1.0f,  1.0f, -1.0f,
-		-1.0f,  1.0f,  1.0f,
-		-1.0f, -1.0f,  1.0f,
-
-		1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-
-		-1.0f, -1.0f,  1.0f,
-		-1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f, -1.0f,  1.0f,
-		-1.0f, -1.0f,  1.0f,
-
-		-1.0f,  1.0f, -1.0f,
-		1.0f,  1.0f, -1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		-1.0f,  1.0f,  1.0f,
-		-1.0f,  1.0f, -1.0f,
-
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f,  1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f,  1.0f,
-		1.0f, -1.0f,  1.0f
-	};
 
 
 	GLuint indices[] =
@@ -387,27 +260,16 @@ int main()
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(0);
 
-
-	//SkyBox
-	/*GLuint skyboxVBO, skyboxVAO;
-	glGenVertexArrays(1, &skyboxVAO);
-	glGenBuffers(1, &skyboxVBO);
-	glBindVertexArray(skyboxVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);*/
-
 	// Load textures
-	/*vector<const GLchar*> faces;
-	faces.push_back("SkyBox/right.tga");
-	faces.push_back("SkyBox/left.tga");
-	faces.push_back("SkyBox/top.tga");
-	faces.push_back("SkyBox/bottom.tga");
-	faces.push_back("SkyBox/back.tga");
-	faces.push_back("SkyBox/front.tga");
+	GLuint texture1, texture2;
+	glGenTextures(1, &texture1);
+	glGenTextures(1, &texture2);
 
-	GLuint cubemapTexture = TextureLoading::LoadCubemap(faces);*/
+
+	// Set texture units
+	lightingShader.Use();
+	glUniform1i(glGetUniformLocation(lightingShader.Program, "material.diffuse"), 0);
+	glUniform1i(glGetUniformLocation(lightingShader.Program, "material.specular"), 1);
 
 	glm::mat4 projection = glm::perspective(camera.GetZoom(), (GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.1f, 1000.0f);
 
@@ -423,7 +285,6 @@ int main()
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
 		DoMovement();
-		animacion();
 
 
 		// Clear the colorbuffer
@@ -431,12 +292,14 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
+
+
 		// Use cooresponding shader when setting uniforms/drawing objects
 		lightingShader.Use();
 		GLint viewPosLoc = glGetUniformLocation(lightingShader.Program, "viewPos");
 		glUniform3f(viewPosLoc, camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
-		// Set material properties
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 16.0f);
+
+
 		// == ==========================
 		// Here we set all the uniforms for the 5/6 types of lights we have. We have to set them manually and index
 		// the proper PointLight struct in the array to set each uniform variable. This can be done more code-friendly
@@ -497,13 +360,14 @@ int main()
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.diffuse"), 0.3f, 0.3f, 0.3f);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.specular"), 0.3f, 0.3f, 0.3f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.constant"), 1.0f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.linear"), 0.35f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.quadratic"), 0.44f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.linear"), 0.09f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.quadratic"), 0.032f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.cutOff"), glm::cos(glm::radians(12.5f)));
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.outerCutOff"), glm::cos(glm::radians(15.0f)));
 
 		
-	
+		// Set material properties
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 16.0f);
 
 		// Create camera transformations
 		glm::mat4 view;
@@ -519,28 +383,25 @@ int main()
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-		// Bind diffuse map
-		//glBindTexture(GL_TEXTURE_2D, texture1);*/
-
-		// Bind specular map
-		/*glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texture2);*/
-
-
 		glBindVertexArray(VAO);
 
-
-
 		glm::mat4 model(1);
-
 		view = camera.GetViewMatrix();
+
+		
+
+		//glEnable(GL_BLEND);//Activa la funcionalidad para trabajar el canal alfa
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		
 		model = glm::mat4(1);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "activaTransparencia"), 0);
+		glUniform4f(glGetUniformLocation(lightingShader.Program, "colorAlpha"), 1.0, 1.0, 1.0, 1.0);
 		Piso.Draw(lightingShader);
 
 		//ParedA1
 		model = glm::mat4(1);
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));	
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		ParedA1.Draw(lightingShader);
 
 		//ParedA2
@@ -565,7 +426,7 @@ int main()
 
 		//Puerta
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(4.3f, 0.0f, 9.4f));
+		model = glm::translate(model, glm::vec3(-1.0f, 0.0f, 9.6f));
 		model = glm::rotate(model, glm::radians(40.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Puerta.Draw(lightingShader);
@@ -623,68 +484,94 @@ int main()
 		//Campana
 		model = glm::mat4(1);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
 		Campana.Draw(lightingShader);
 
 
+		//AlacenaHorizontal
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		AlacenaHorizontal.Draw(lightingShader);
+
+		//AlacenaVertical
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		AlacenaVertical.Draw(lightingShader);
+
+		//Reloj
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(4.5f, 4.0f, -9.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Reloj.Draw(lightingShader);
+
+		//Manecilla del reloj
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(4.44f, 4.74f, -8.8f));
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		model = glm::rotate(model, glm::radians(40.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		ManecillaReloj.Draw(lightingShader);
+
+		//AlacenaHoriCajones
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		AlacenaCajones.Draw(lightingShader);
 		
+		//AlacenaHoriCajones
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		AlacenaGrande.Draw(lightingShader);
 
-		glEnable(GL_BLEND);//Activa la funcionalidad para trabajar el canal alfa
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//Ball
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Ball.Draw(lightingShader);
+		
+		//Tejado
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Tejado.Draw(lightingShader);
 
-		//Desactiva el canal alfa
-		glDisable(GL_BLEND); 
-		glUniform4f(glGetUniformLocation(lightingShader.Program, "colorAlpha"), 1.0, 1.0, 1.0, 1.0);
+		//Tejado Entrada
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		TejaEntrada.Draw(lightingShader);
 
+		////Desactiva el canal alfa
+		/*glDisable(GL_BLEND); 
+		glUniform4f(glGetUniformLocation(lightingShader.Program, "colorAlpha"), 1.0, 1.0, 1.0, 1.0);*/
 
-		glEnable(GL_DEPTH_TEST);
 		glBindVertexArray(0);
 
 
 		// Also draw the lamp object, again binding the appropriate shader
-		//lampShader.Use();
-		//// Get location objects for the matrices on the lamp shader (these could be different on a different shader)
-		//modelLoc = glGetUniformLocation(lampShader.Program, "model");
-		//viewLoc = glGetUniformLocation(lampShader.Program, "view");
-		//projLoc = glGetUniformLocation(lampShader.Program, "projection");
+		lampShader.Use();
+		// Get location objects for the matrices on the lamp shader (these could be different on a different shader)
+		modelLoc = glGetUniformLocation(lampShader.Program, "model");
+		viewLoc = glGetUniformLocation(lampShader.Program, "view");
+		projLoc = glGetUniformLocation(lampShader.Program, "projection");
 
-		//// Set matrices
-		//glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		//glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-		//model = glm::mat4(1);
-		//model = glm::translate(model, lightPos);
-		//model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
-		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		//// Draw the light object (using light's vertex attributes)
-		//glBindVertexArray(lightVAO);
-		//for (GLuint i = 0; i < 4; i++)
-		//{
-		//	model = glm::mat4(1);
-		//	model = glm::translate(model, pointLightPositions[i]);
-		//	model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
-		//	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		//	glDrawArrays(GL_TRIANGLES, 0, 36);
-		//}
-		//glBindVertexArray(0);
-
-
-		// Draw skybox as last
-		//glDepthFunc(GL_LEQUAL);  // Change depth function so depth test passes when values are equal to depth buffer's content
-		//SkyBoxshader.Use();
-		//view = glm::mat4(glm::mat3(camera.GetViewMatrix()));	// Remove any translation component of the view matrix
-		//glUniformMatrix4fv(glGetUniformLocation(SkyBoxshader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-		//glUniformMatrix4fv(glGetUniformLocation(SkyBoxshader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-		//// skybox cube
-		//glBindVertexArray(skyboxVAO);
-		//glActiveTexture(GL_TEXTURE1);
-		//glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-		//glDrawArrays(GL_TRIANGLES, 0, 36);
-		//glBindVertexArray(0);
-		//glDepthFunc(GL_LESS); // Set depth function back to default
+		// Set matrices
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+		model = glm::mat4(1);
+		model = glm::translate(model, lightPos);
+		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		// Draw the light object (using light's vertex attributes)
+		glBindVertexArray(lightVAO);
+		for (GLuint i = 0; i < 4; i++)
+		{
+			model = glm::mat4(1);
+			model = glm::translate(model, pointLightPositions[i]);
+			model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
+		glBindVertexArray(0);
 
 
-
-
+	
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
 	}
@@ -696,11 +583,8 @@ int main()
 	glDeleteVertexArrays(1, &lightVAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
-	//glDeleteVertexArrays(1, &skyboxVAO);
-	//glDeleteBuffers(1, &skyboxVBO);
 	// Terminate GLFW, clearing any resources allocated by GLFW.
 	glfwTerminate();
-
 
 
 
@@ -708,80 +592,10 @@ int main()
 }
 
 
-void animacion()
-{
-
-	//Movimiento del personaje
-
-	if (play)
-	{
-		if (i_curr_steps >= i_max_steps) //end of animation between frames?
-		{
-			playIndex++;
-			if (playIndex > FrameIndex - 2)	//end of total animation?
-			{
-				printf("termina anim\n");
-				playIndex = 0;
-				play = false;
-			}
-			else //Next frame interpolations
-			{
-				i_curr_steps = 0; //Reset counter
-								  //Interpolation
-				interpolation();
-			}
-		}
-		else
-		{
-			//Draw animation
-			posX += KeyFrame[playIndex].incX;
-			posY += KeyFrame[playIndex].incY;
-			posZ += KeyFrame[playIndex].incZ;
-
-			rotRodIzq += KeyFrame[playIndex].rotInc;
-
-			i_curr_steps++;
-		}
-
-	}
-}
-
-
 // Is called whenever a key is pressed/released via GLFW
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
-	if (keys[GLFW_KEY_L])
-	{
-		if (play == false && (FrameIndex > 1))
-		{
-
-			resetElements();
-			//First Interpolation				
-			interpolation();
-
-			play = true;
-			playIndex = 0;
-			i_curr_steps = 0;
-		}
-		else
-		{
-			play = false;
-		}
-
-	}
-
-	if (keys[GLFW_KEY_K])
-	{
-		if (FrameIndex < MAX_FRAMES)
-		{
-			saveFrame();
-		}
-
-		rot = -25.0f;//Variable que maneja el giro de la camara
-
-	}
-
-
+	
 	if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action)
 	{
 		glfwSetWindowShouldClose(window, GL_TRUE);
@@ -832,52 +646,6 @@ void MouseCallback(GLFWwindow* window, double xPos, double yPos)
 void DoMovement()
 {
 
-	if (keys[GLFW_KEY_1])
-	{
-
-		movCamera = 0.01f;//Manda una velocidad de 0.01 a la camara automatica
-
-	}
-
-	if (keys[GLFW_KEY_2])
-	{
-		if (rotRodIzq < 80.0f)
-			rotRodIzq += 1.0f;
-
-	}
-
-	if (keys[GLFW_KEY_3])
-	{
-		if (rotRodIzq > -45)
-			rotRodIzq -= 1.0f;
-
-	}
-
-
-
-	//Mov Personaje
-	if (keys[GLFW_KEY_H])
-	{
-		posZ += 1;
-	}
-
-	if (keys[GLFW_KEY_Y])
-	{
-		posZ -= 1;
-	}
-
-	if (keys[GLFW_KEY_G])
-	{
-		posX -= 1;
-	}
-
-	if (keys[GLFW_KEY_J])
-	{
-		posX += 1;
-	}
-
-
-
 
 	// Camera controls
 	if (keys[GLFW_KEY_W] || keys[GLFW_KEY_UP])
@@ -904,10 +672,5 @@ void DoMovement()
 	{
 		camera.ProcessKeyboard(RIGHT, deltaTime);
 	}
-
-
-
-
-
 
 }

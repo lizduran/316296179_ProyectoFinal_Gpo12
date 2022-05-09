@@ -29,6 +29,7 @@
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 void DoMovement();
+void animacion();
 
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
@@ -41,6 +42,30 @@ GLfloat lastY = HEIGHT / 2.0;
 bool keys[1024];
 bool firstMouse = true;
 
+//Anim agua
+float tiempo;
+
+//Anim puerta
+bool animPuerta = true;
+float rotPuerta = 0.0f;
+
+//Anim Manecilla Reloj
+bool animReloj = true;
+float rotManecilla = 0.0f;
+
+//Anim Campana
+bool animCampana = true;
+float rotCampana = 0.0f;
+glm::vec3 lightCampana;
+
+
+// Positions of the point lights
+glm::vec3 pointLightPositions[] = {
+	glm::vec3(0.0f, 6.5f, 0.0f),
+	glm::vec3(-10.0f,0,0),
+	glm::vec3(-10.0f,0,0),
+	glm::vec3(-10.0f,0,0)
+};
 
 // Light attributes
 glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
@@ -50,15 +75,9 @@ glm::vec3 lightDirection(0.0f, 0.0f, 0.0f);
 bool active;
 
 
-// Positions of the point lights
-glm::vec3 pointLightPositions[] = {
-	glm::vec3(0.7f,  0.2f,  2.0f),
-	glm::vec3(2.3f, -3.3f, -4.0f),
-	glm::vec3(-4.0f,  2.0f, -12.0f),
-	glm::vec3(0.0f,  0.0f, -3.0f)
-};
 
-glm::vec3 LightP1;
+
+
 
 
 // Deltatime
@@ -117,6 +136,7 @@ int main()
 
 	Shader lightingShader("Shaders/lighting.vs", "Shaders/lighting.frag");
 	Shader lampShader("Shaders/lamp.vs", "Shaders/lamp.frag");
+	Shader Anim("Shaders/anim.vs", "Shaders/anim.frag");
 
 	
 	Model ParedA1((char*)"Models/Fachada/Pared1.obj");
@@ -143,6 +163,8 @@ int main()
 	Model AlacenaGrande((char*)"Models/Alacena/alacenaGrande.obj");
 	Model Ball((char*)"Models/Ball/playaBall.obj");
 	Model TejaEntrada((char*)"Models/Fachada/Entrada.obj");
+	Model AguaBowl((char*)"Models/Bowl/aguaBowl.obj");
+	Model Lampara((char*)"Models/Lampara/lampara.obj");
 	
 	
 	// Build and compile our shader program
@@ -285,6 +307,7 @@ int main()
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
 		DoMovement();
+		animacion();
 
 
 		// Clear the colorbuffer
@@ -317,8 +340,8 @@ int main()
 		// Point light 1
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].position"), pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].ambient"), 0.05f, 0.05f, 0.05f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].diffuse"), LightP1.x, LightP1.y, LightP1.z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].specular"), LightP1.x, LightP1.y, LightP1.z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].diffuse"), lightCampana.x, lightCampana.y, lightCampana.z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].specular"), lightCampana.x, lightCampana.y, lightCampana.z);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].constant"), 1.0f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].linear"), 0.09f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"), 0.032f);
@@ -385,6 +408,10 @@ int main()
 
 		glBindVertexArray(VAO);
 
+		
+		//Temp para las puertas de la alacena
+		glm::mat4 tmp = glm::mat4(1.0f);
+		glm::mat4 tmp2 = glm::mat4(1.0f);
 		glm::mat4 model(1);
 		view = camera.GetViewMatrix();
 
@@ -395,8 +422,6 @@ int main()
 		
 		model = glm::mat4(1);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glUniform1i(glGetUniformLocation(lightingShader.Program, "activaTransparencia"), 0);
-		glUniform4f(glGetUniformLocation(lightingShader.Program, "colorAlpha"), 1.0, 1.0, 1.0, 1.0);
 		Piso.Draw(lightingShader);
 
 		//ParedA1
@@ -426,43 +451,44 @@ int main()
 
 		//Puerta
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(-1.0f, 0.0f, 9.6f));
-		model = glm::rotate(model, glm::radians(40.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(-0.9f, 0.0f, 9.6f));
+		model = glm::rotate(model, glm::radians(rotPuerta), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Puerta.Draw(lightingShader);
 
+		
 		//AlacenaFlotante 1
 		model = glm::mat4(1);
+		tmp2 = tmp = model = glm::translate(model, glm::vec3(-9.5f, 3.0f, 2.4f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		AlacenaFlotante.Draw(lightingShader);
 
+		//AlacenaFlotante 2
+		model = glm::translate(tmp2, glm::vec3(0.0f, 0.0f, -6.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		AlacenaFlotante.Draw(lightingShader);
 
 		//Puerta 1 - AlacenaFlotante 1
-		model = glm::mat4(1);
+		tmp2 = tmp = model = glm::translate(tmp, glm::vec3(-0.0f, 0.241f, 0.77f));
+		model = glm::rotate(model, glm::radians(-rotPuerta), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		AlaPuerta1.Draw(lightingShader);
+
+		//Puerta 1 - AlacenaFlotante 2
+		model = glm::translate(tmp, glm::vec3(0.0f, 0.0f, -6.0f));
+		model = glm::rotate(model, glm::radians(-rotPuerta), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		AlaPuerta1.Draw(lightingShader);
 
 		//Puerta 2 - AlacenaFlotante 1
-		model = glm::mat4(1);
+		tmp2 = model = glm::translate(tmp2, glm::vec3(0.0f, 0.0f, -1.65f));
+		model = glm::rotate(model, glm::radians(rotPuerta), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		AlaPuerta2.Draw(lightingShader);
 
-		//AlacenaFlotante 2
-		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -5.0f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		AlacenaFlotante.Draw(lightingShader);
-
-
-		//Puerta 1 - AlacenaFlotante 2
-		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -5.0f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		AlaPuerta1.Draw(lightingShader);
-
 		//Puerta 2 - AlacenaFlotante 2
-		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -5.0f));
+		model = glm::translate(tmp2, glm::vec3(0.0f, 0.0f, -6.0f));
+		model = glm::rotate(model, glm::radians(rotPuerta), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		AlaPuerta2.Draw(lightingShader);
 
@@ -483,8 +509,8 @@ int main()
 
 		//Campana
 		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-0.45f, 4.5f, -8.8f) );
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
 		Campana.Draw(lightingShader);
 
 
@@ -500,16 +526,15 @@ int main()
 
 		//Reloj
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(4.5f, 4.0f, -9.0f));
+		tmp = model = glm::translate(model, glm::vec3(4.5f, 4.0f, -8.7f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Reloj.Draw(lightingShader);
 
 		//Manecilla del reloj
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(4.44f, 4.74f, -8.8f));
-		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::translate(tmp, glm::vec3(0.05f, 0.72f, 0.1f));
+		model = glm::rotate(model, glm::radians(-rotManecilla), glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		model = glm::rotate(model, glm::radians(40.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		ManecillaReloj.Draw(lightingShader);
 
 		//AlacenaHoriCajones
@@ -524,8 +549,15 @@ int main()
 
 		//Ball
 		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-5.0f, 0.0f, 7.6f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Ball.Draw(lightingShader);
+
+		//Lampara 
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(0.0f, 6.5, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Lampara.Draw(lightingShader);
 		
 		//Tejado
 		model = glm::mat4(1);
@@ -536,6 +568,35 @@ int main()
 		model = glm::mat4(1);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		TejaEntrada.Draw(lightingShader);
+
+		
+
+		//Agua Bowl
+		//Mandar a llamar el shader
+		Anim.Use();
+		//Conectar variable time con anim.vs
+		tiempo = glfwGetTime();
+		//Indicar al shader que se ocupara un espacio en memoria para las matrices. 
+		modelLoc = glGetUniformLocation(Anim.Program, "model");
+		viewLoc = glGetUniformLocation(Anim.Program, "view");
+		projLoc = glGetUniformLocation(Anim.Program, "projection");
+
+		// Las matrices ya tiene nuevos valores
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		//Set matriz
+		model = glm::mat4(1);
+		//Avisarle al shader q set a la matriz 
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		//Para variar tiempo
+		glUniform1f(glGetUniformLocation(Anim.Program, "time"), tiempo);
+
+		//Dibujar el modelo
+		AguaBowl.Draw(Anim);
+		//Termina el Anim Shader
+		glBindVertexArray(0);
+		
 
 		////Desactiva el canal alfa
 		/*glDisable(GL_BLEND); 
@@ -556,6 +617,7 @@ int main()
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 		model = glm::mat4(1);
 		model = glm::translate(model, lightPos);
+
 		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		// Draw the light object (using light's vertex attributes)
@@ -591,6 +653,63 @@ int main()
 	return 0;
 }
 
+//Animaciones
+void animacion() {
+
+	if (animPuerta)
+	{
+		if (rotPuerta > 0.0f) {
+			rotPuerta -= 0.08f;
+		}
+		else {
+			animPuerta = false;
+		}
+	}
+	else
+	{
+		if (rotPuerta < 27.0f) {
+			rotPuerta += 0.08f;
+		}
+		else {
+			animPuerta = true;
+		}
+	}
+
+	if (animReloj)
+	{
+		if (rotManecilla >= 0.0f) {
+			rotManecilla += 0.04f;
+		}
+		else {
+			rotManecilla = false;
+		}
+	}
+
+	if (animCampana)
+	{
+		if (rotCampana > 0.0f) {
+
+			rotCampana -= 0.05f;
+			lightCampana = glm::vec3(1.0f, 1.0f, 0.0f);
+		}
+		else {
+			animCampana = false;
+		}
+	}
+	else
+	{
+		if (rotCampana < 5.0f) {
+			rotCampana += 0.05f;
+			lightCampana = glm::vec3(0.0f, 0.0f, 0.0f);
+		}
+		else {
+			animCampana = true;
+		}
+	}
+
+
+}
+
 
 // Is called whenever a key is pressed/released via GLFW
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
@@ -613,14 +732,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		}
 	}
 
-	if (keys[GLFW_KEY_SPACE])
-	{
-		active = !active;
-		if (active)
-			LightP1 = glm::vec3(1.0f, 0.0f, 0.0f);
-		else
-			LightP1 = glm::vec3(0.0f, 0.0f, 0.0f);
-	}
+	
 }
 
 void MouseCallback(GLFWwindow* window, double xPos, double yPos)

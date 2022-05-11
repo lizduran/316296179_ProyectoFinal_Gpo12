@@ -39,6 +39,12 @@
     <None Include="Shaders\anim.vs">
       <Filter>Archivos de origen</Filter>
     </None>
+    <None Include="Shaders\anim2.frag">
+      <Filter>Archivos de origen</Filter>
+    </None>
+    <None Include="Shaders\anim2.vs">
+      <Filter>Archivos de origen</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesh.h">

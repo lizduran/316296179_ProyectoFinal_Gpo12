@@ -53,23 +53,39 @@ float rotPuerta = 0.0f;
 bool animReloj = true;
 float rotManecilla = 0.0f;
 
-//Anim Campana
-bool animCampana = true;
-float rotCampana = 0.0f;
+//Anim Lampara
+bool animLampara = true;
+float rotLampara = 0.0f;
 glm::vec3 lightCampana;
 
+//Anim Ball
+glm::vec3 PosIni(-5.2f, 2.1f, -6.6f);
+float movKitX = 0.0;
+float movKitZ = 0.0;
+float ejeX = 0.0;
+float ejeZ = 0.0;
+float rotKit = 0.0;
+
+bool animBall = true;
+bool recorrido1 = true;
+bool recorrido2 = false;
+bool recorrido3 = false;
+bool recorrido4 = false;
+
+//Anim Cajon
+bool animCajon = true;
+float transCajon = 0.0f;
 
 // Positions of the point lights
 glm::vec3 pointLightPositions[] = {
-	glm::vec3(0.0f, 6.5f, 0.0f),
-	glm::vec3(-10.0f,0,0),
-	glm::vec3(-10.0f,0,0),
-	glm::vec3(-10.0f,0,0)
+	glm::vec3(0.0f, 6.6f, 0.0f),
+	glm::vec3(0,-1.0f,0),
+	glm::vec3(0, -1.0f,0),
+	glm::vec3(0,-1.0f,0)
 };
 
 // Light attributes
 glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
-glm::vec3 PosIni(-95.0f, 0.0f, -45.0f);
 glm::vec3 lightDirection(0.0f, 0.0f, 0.0f);
 
 bool active;
@@ -160,11 +176,12 @@ int main()
 	Model Reloj((char*)"Models/Reloj/reloj.obj");
 	Model ManecillaReloj((char*)"Models/Reloj/manecilla.obj");
 	Model AlacenaCajones((char*)"Models/Alacena/AlacenaHoriCajones.obj");
-	Model AlacenaGrande((char*)"Models/Alacena/alacenaGrande.obj");
+	Model AlacenaVerCajones((char*)"Models/Alacena/alacenaVerCajones.obj");
 	Model Ball((char*)"Models/Ball/playaBall.obj");
 	Model TejaEntrada((char*)"Models/Fachada/Entrada.obj");
 	Model AguaBowl((char*)"Models/Bowl/aguaBowl.obj");
 	Model Lampara((char*)"Models/Lampara/lampara.obj");
+	Model Cajon((char*)"Models/Alacena/cajon.obj");
 	
 	
 	// Build and compile our shader program
@@ -347,7 +364,7 @@ int main()
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"), 0.032f);
 
 
-
+		
 		// Point light 2
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].position"), pointLightPositions[1].x, pointLightPositions[1].y, pointLightPositions[1].z);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].ambient"), 0.05f, 0.05f, 0.05f);
@@ -375,7 +392,7 @@ int main()
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[3].linear"), 0.09f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[3].quadratic"), 0.032f);
 
-		
+	
 		// SpotLight
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.position"), camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.direction"), camera.GetFront().x, camera.GetFront().y, camera.GetFront().z);
@@ -524,6 +541,8 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		AlacenaVertical.Draw(lightingShader);
 
+		
+
 		//Reloj
 		model = glm::mat4(1);
 		tmp = model = glm::translate(model, glm::vec3(4.5f, 4.0f, -8.7f));
@@ -542,14 +561,22 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		AlacenaCajones.Draw(lightingShader);
 		
-		//AlacenaHoriCajones
+		//AlacenaVerticalCajones
 		model = glm::mat4(1);
+		tmp = model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		AlacenaGrande.Draw(lightingShader);
+		AlacenaVerCajones.Draw(lightingShader);
+
+		//Cajon de alacena vertical
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(9.55f - transCajon, 0.24f, 3.79f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Cajon.Draw(lightingShader);
 
 		//Ball
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(-5.0f, 0.0f, 7.6f));
+		model = glm::translate(model, PosIni + glm::vec3(movKitX, 0.0f, movKitZ));
+		model = glm::rotate(model, glm::radians(rotKit), glm::vec3(ejeX, 0.0f, ejeZ));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Ball.Draw(lightingShader);
 
@@ -569,6 +596,7 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		TejaEntrada.Draw(lightingShader);
 
+		glBindVertexArray(0);
 		
 
 		//Agua Bowl
@@ -585,15 +613,24 @@ int main()
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		
 		//Set matriz
+		//Agua 1
 		model = glm::mat4(1);
 		//Avisarle al shader q set a la matriz 
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		//Para variar tiempo
-		glUniform1f(glGetUniformLocation(Anim.Program, "time"), tiempo);
-
 		//Dibujar el modelo
 		AguaBowl.Draw(Anim);
+
+		//Agua 2
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-0.77f, 0.05f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		//Dibujar el modelo
+		AguaBowl.Draw(Anim);
+
+		//Para variar tiempo
+		glUniform1f(glGetUniformLocation(Anim.Program, "time"), tiempo);
 		//Termina el Anim Shader
 		glBindVertexArray(0);
 		
@@ -602,7 +639,7 @@ int main()
 		/*glDisable(GL_BLEND); 
 		glUniform4f(glGetUniformLocation(lightingShader.Program, "colorAlpha"), 1.0, 1.0, 1.0, 1.0);*/
 
-		glBindVertexArray(0);
+		
 
 
 		// Also draw the lamp object, again binding the appropriate shader
@@ -659,7 +696,7 @@ void animacion() {
 	if (animPuerta)
 	{
 		if (rotPuerta > 0.0f) {
-			rotPuerta -= 0.08f;
+			rotPuerta -= 0.1f;
 		}
 		else {
 			animPuerta = false;
@@ -668,7 +705,7 @@ void animacion() {
 	else
 	{
 		if (rotPuerta < 27.0f) {
-			rotPuerta += 0.08f;
+			rotPuerta += 0.1f;
 		}
 		else {
 			animPuerta = true;
@@ -685,29 +722,105 @@ void animacion() {
 		}
 	}
 
-	if (animCampana)
+	if (animLampara)
 	{
-		if (rotCampana > 0.0f) {
+		if (rotLampara > 0.0f) {
 
-			rotCampana -= 0.05f;
+			rotLampara -= 0.05f;
 			lightCampana = glm::vec3(1.0f, 1.0f, 0.0f);
 		}
 		else {
-			animCampana = false;
+			animLampara = false;
 		}
 	}
 	else
 	{
-		if (rotCampana < 5.0f) {
-			rotCampana += 0.05f;
+		if (rotLampara < 5.0f) {
+			rotLampara += 0.04f;
 			lightCampana = glm::vec3(0.0f, 0.0f, 0.0f);
 		}
 		else {
-			animCampana = true;
+			animLampara = true;
 		}
 	}
 
+	if (animCajon)
+	{
+		if (transCajon > 0.0f) {
+			transCajon -= 0.0005f;
+		}
+		else {
+			animCajon = false;
+		}
+	}
+	else
+	{
+		if (transCajon < 0.10f) {
+			transCajon += 0.0005f;
+		}
+		else {
+			animCajon = true;
+		}
+	}
 
+	if (animBall)
+	{
+		if (recorrido1)
+		{
+			movKitX += 0.05f;
+
+			ejeX = 0.0f;
+			ejeZ = 1.0f;
+			rotKit += 1.0f;
+			if (movKitX > 14.0f)
+			{
+				recorrido1 = false;
+				recorrido2 = true;
+			}
+		}
+		if (recorrido2)
+		{
+			movKitZ += 0.05f;
+			movKitX -= 0.05f;
+
+			ejeX = 0.0f;
+			ejeZ = 1.0f;
+			rotKit += 1.0f;
+
+			if (movKitZ > 14.0f)
+			{
+				recorrido2 = false;
+				recorrido3 = true;
+
+			}
+		}
+
+
+		if (recorrido3)
+		{
+			movKitZ -= 0.05f;
+
+			rotKit += 1.0f;
+			ejeX = 1.0f;
+			ejeZ = 0.0f;
+
+			if (movKitZ < 0)
+			{
+				recorrido3 = false;
+				recorrido4 = true;
+			}
+		}
+		if (recorrido4)
+		{
+			movKitX += 0.05f;
+			rotKit += 1.0f;
+			if (movKitX > 0)
+			{
+				recorrido4 = false;
+				recorrido1 = true;
+			}
+		}
+	}
 }
 
 

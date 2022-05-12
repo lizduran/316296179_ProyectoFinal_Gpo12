@@ -1,24 +1,30 @@
-﻿#include <iostream>
-#include <cmath>
+﻿/*
+* 
+316296179     Grupo: 12
+Proyecto Final Laboratorio
 
+Recreación en 3D de un espacio ficticio con el uso de Maya y OpenGL.
+
+Código fuente basado en el código dado por el profesor en GitHub y en las prácticas.
+*
+*/
+
+//Libraries//
+
+#include <iostream>
+#include <cmath>
 // GLEW
 #include <GL/glew.h>
-
 // GLFW
 #include <GLFW/glfw3.h>
-
 // Other Libs
 #include "stb_image.h"
-
 // GLM Mathematics
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
 //Load Models
 #include "SOIL2/SOIL2.h"
-
-
 //Other includes
 #include "Shader.h"
 #include "Camera.h"
@@ -42,23 +48,23 @@ GLfloat lastY = HEIGHT / 2.0;
 bool keys[1024];
 bool firstMouse = true;
 
-//Anim agua
+//Variables para animación de agua
 float tiempo;
 
-//Anim puerta
+//Variables para animación de la puerta
 bool animPuerta = true;
 float rotPuerta = 0.0f;
 
-//Anim Manecilla Reloj
+//Variables para animación de manecilla Reloj
 bool animReloj = true;
 float rotManecilla = 0.0f;
 
-//Anim Lampara
+//Variables para animación de Lampara
 bool animLampara = true;
 float rotLampara = 0.0f;
 glm::vec3 lightCampana;
 
-//Anim Ball
+//Variables para animación de Ball
 glm::vec3 PosIni(-5.2f, 2.1f, -6.6f);
 float movKitX = 0.0;
 float movKitZ = 0.0;
@@ -72,28 +78,20 @@ bool recorrido2 = false;
 bool recorrido3 = false;
 bool recorrido4 = false;
 
-//Anim Cajon
+//Variables para animación de cajón
 bool animCajon = true;
 float transCajon = 0.0f;
 
 // Positions of the point lights
 glm::vec3 pointLightPositions[] = {
 	glm::vec3(0.0f, 6.6f, 0.0f),
-	glm::vec3(0,-1.0f,0),
-	glm::vec3(0, -1.0f,0),
-	glm::vec3(0,-1.0f,0)
+	glm::vec3(0,-1.0f,0),   //Not used
+	glm::vec3(0, -1.0f,0), //Not used
+	glm::vec3(0,-1.0f,0)  //Not used
 };
 
 // Light attributes
 glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
-glm::vec3 lightDirection(0.0f, 0.0f, 0.0f);
-
-bool active;
-
-
-
-
-
 
 
 // Deltatime
@@ -150,11 +148,12 @@ int main()
 	// OpenGL options
 	glEnable(GL_DEPTH_TEST);
 
+	//Load Shaders
 	Shader lightingShader("Shaders/lighting.vs", "Shaders/lighting.frag");
 	Shader lampShader("Shaders/lamp.vs", "Shaders/lamp.frag");
 	Shader Anim("Shaders/anim.vs", "Shaders/anim.frag");
 
-	
+	//Load Models
 	Model ParedA1((char*)"Models/Fachada/Pared1.obj");
 	Model ParedA1B((char*)"Models/Fachada/Pared1B.obj");
 	Model ParedA2((char*)"Models/Fachada/Pared2.obj");
@@ -183,8 +182,6 @@ int main()
 	Model Lampara((char*)"Models/Lampara/lampara.obj");
 	Model Cajon((char*)"Models/Alacena/cajon.obj");
 	
-	
-	// Build and compile our shader program
 
 
 	// Set up vertex data (and buffer(s)) and attribute pointers
@@ -310,6 +307,7 @@ int main()
 	glUniform1i(glGetUniformLocation(lightingShader.Program, "material.diffuse"), 0);
 	glUniform1i(glGetUniformLocation(lightingShader.Program, "material.specular"), 1);
 
+	//Set proyection matrix
 	glm::mat4 projection = glm::perspective(camera.GetZoom(), (GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.1f, 1000.0f);
 
 	// Game loop
@@ -332,8 +330,6 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-
-
 		// Use cooresponding shader when setting uniforms/drawing objects
 		lightingShader.Use();
 		GLint viewPosLoc = glGetUniformLocation(lightingShader.Program, "viewPos");
@@ -346,13 +342,12 @@ int main()
 		// by defining light types as classes and set their values in there, or by using a more efficient uniform approach
 		// by using 'Uniform buffer objects', but that is something we discuss in the 'Advanced GLSL' tutorial.
 		// == ==========================
-		// 
+		
 		// Directional light
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.5f, 0.5f, 0.5f);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
-
 		
 		// Point light 1
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].position"), pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
@@ -363,8 +358,6 @@ int main()
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].linear"), 0.09f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"), 0.032f);
 
-
-		
 		// Point light 2
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].position"), pointLightPositions[1].x, pointLightPositions[1].y, pointLightPositions[1].z);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].ambient"), 0.05f, 0.05f, 0.05f);
@@ -392,7 +385,6 @@ int main()
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[3].linear"), 0.09f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[3].quadratic"), 0.032f);
 
-	
 		// SpotLight
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.position"), camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.direction"), camera.GetFront().x, camera.GetFront().y, camera.GetFront().z);
@@ -426,7 +418,7 @@ int main()
 		glBindVertexArray(VAO);
 
 		
-		//Temp para las puertas de la alacena
+		//Temporal Matrix for hierarchical model in alacena door´s
 		glm::mat4 tmp = glm::mat4(1.0f);
 		glm::mat4 tmp2 = glm::mat4(1.0f);
 		glm::mat4 model(1);
@@ -541,8 +533,7 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		AlacenaVertical.Draw(lightingShader);
 
-		
-
+	
 		//Reloj
 		model = glm::mat4(1);
 		tmp = model = glm::translate(model, glm::vec3(4.5f, 4.0f, -8.7f));
@@ -598,7 +589,8 @@ int main()
 
 		glBindVertexArray(0);
 		
-
+		//Anim Shader to create an animacion with water
+		
 		//Agua Bowl
 		//Mandar a llamar el shader
 		Anim.Use();
@@ -690,7 +682,7 @@ int main()
 	return 0;
 }
 
-//Animaciones
+//Animaciones Function
 void animacion() {
 
 	if (animPuerta)

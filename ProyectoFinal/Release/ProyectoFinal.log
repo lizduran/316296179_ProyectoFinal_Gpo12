@@ -1,21 +1,21 @@
 ﻿  MainLizeth.cpp
-C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\ProyectoFinal\MainLizeth.cpp(318,24): warning C4244: 'inicializando': conversión de 'double' a 'GLfloat'; posible pérdida de datos
-C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\ProyectoFinal\MainLizeth.cpp(598,23): warning C4244: '=': conversión de 'double' a 'float'; posible pérdida de datos
-C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\ProyectoFinal\MainLizeth.cpp(848,11): warning C4244: '=': conversión de 'double' a 'GLfloat'; posible pérdida de datos
-C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\ProyectoFinal\MainLizeth.cpp(849,11): warning C4244: '=': conversión de 'double' a 'GLfloat'; posible pérdida de datos
-C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\ProyectoFinal\MainLizeth.cpp(853,18): warning C4244: 'inicializando': conversión de 'double' a 'GLfloat'; posible pérdida de datos
-C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\ProyectoFinal\MainLizeth.cpp(854,18): warning C4244: 'inicializando': conversión de 'double' a 'GLfloat'; posible pérdida de datos
-C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\ProyectoFinal\MainLizeth.cpp(856,10): warning C4244: '=': conversión de 'double' a 'GLfloat'; posible pérdida de datos
-C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\ProyectoFinal\MainLizeth.cpp(857,10): warning C4244: '=': conversión de 'double' a 'GLfloat'; posible pérdida de datos
+C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\ProyectoFinal\MainLizeth.cpp(331,24): warning C4244: 'inicializando': conversión de 'double' a 'GLfloat'; posible pérdida de datos
+C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\ProyectoFinal\MainLizeth.cpp(671,23): warning C4244: '=': conversión de 'double' a 'float'; posible pérdida de datos
+C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\ProyectoFinal\MainLizeth.cpp(897,11): warning C4244: '=': conversión de 'double' a 'GLfloat'; posible pérdida de datos
+C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\ProyectoFinal\MainLizeth.cpp(898,11): warning C4244: '=': conversión de 'double' a 'GLfloat'; posible pérdida de datos
+C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\ProyectoFinal\MainLizeth.cpp(902,18): warning C4244: 'inicializando': conversión de 'double' a 'GLfloat'; posible pérdida de datos
+C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\ProyectoFinal\MainLizeth.cpp(903,18): warning C4244: 'inicializando': conversión de 'double' a 'GLfloat'; posible pérdida de datos
+C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\ProyectoFinal\MainLizeth.cpp(905,10): warning C4244: '=': conversión de 'double' a 'GLfloat'; posible pérdida de datos
+C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\ProyectoFinal\MainLizeth.cpp(906,10): warning C4244: '=': conversión de 'double' a 'GLfloat'; posible pérdida de datos
 soil2-debug.lib(SOIL2.obj) : warning LNK4075: se omite '/EDITANDCONTINUE' debido a la especificación '/OPT:ICF'
 LINK : warning LNK4098: la biblioteca predeterminada'MSVCRTD' entra en conflicto con otras bibliotecas; use la biblioteca /NODEFAULTLIB:biblioteca
   Generando código
-  1 of 622 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+  4 of 621 functions ( 0.6%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+    27 functions had inline decision re-evaluated but remain unchanged
   Generación de código finalizada
 soil2-debug.lib(etc1_utils.obj) : warning LNK4099: no se encontró PDB 'soil2-debug.pdb' con 'soil2-debug.lib(etc1_utils.obj)' o en 'C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\Release\soil2-debug.pdb'; se vinculará el objeto sin tener en cuenta información de depuración
 soil2-debug.lib(image_DXT.obj) : warning LNK4099: no se encontró PDB 'soil2-debug.pdb' con 'soil2-debug.lib(image_DXT.obj)' o en 'C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\Release\soil2-debug.pdb'; se vinculará el objeto sin tener en cuenta información de depuración
 soil2-debug.lib(image_helper.obj) : warning LNK4099: no se encontró PDB 'soil2-debug.pdb' con 'soil2-debug.lib(image_helper.obj)' o en 'C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\Release\soil2-debug.pdb'; se vinculará el objeto sin tener en cuenta información de depuración
-soil2-debug.lib(SOIL2.obj) : warning LNK4099: no se encontró PDB '' con 'soil2-debug.lib(SOIL2.obj)' o en ''; se vinculará el objeto sin tener en cuenta información de depuración
+soil2-debug.lib(SOIL2.obj) : warning LNK4099: no se encontró PDB 'soil2-debug.pdb' con 'soil2-debug.lib(SOIL2.obj)' o en 'C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\Release\soil2-debug.pdb'; se vinculará el objeto sin tener en cuenta información de depuración
   ProyectoFinal.vcxproj -> C:\Users\lizet\Documents\GitHub\316296179_ProyectoFinal_Gpo12\Release\ProyectoFinal.exe

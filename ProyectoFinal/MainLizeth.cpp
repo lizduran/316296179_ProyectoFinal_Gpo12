@@ -1,7 +1,7 @@
 ﻿/*
 * 
-316296179     Grupo: 12
-Proyecto Final Laboratorio
+316296179     Grupo: 04
+Proyecto Final 
 
 Recreación en 3D de un espacio ficticio con el uso de Maya y OpenGL.
 
@@ -51,8 +51,8 @@ bool firstMouse = true;
 //Variables para animación de agua
 float tiempo;
 
-//Variables para animación de la puerta
-bool animPuerta = true;
+//Variables para animación de la puerta;
+bool animPuerta = false;
 float rotPuerta = 0.0f;
 
 //Variables para animación de manecilla Reloj
@@ -60,7 +60,8 @@ bool animReloj = true;
 float rotManecilla = 0.0f;
 
 //Variables para animación de Lampara
-bool animLampara = true;
+bool animLampara = false;
+bool prenderLampara = false;
 float rotLampara = 0.0f;
 glm::vec3 lightCampana;
 
@@ -155,7 +156,6 @@ int main()
 
 	//Load Models
 	Model ParedA1((char*)"Models/Fachada/Pared1.obj");
-	Model ParedA1B((char*)"Models/Fachada/Pared1B.obj");
 	Model ParedA2((char*)"Models/Fachada/Pared2.obj");
 	Model ParedA3((char*)"Models/Fachada/Pared3.obj");
 	Model ParedA4((char*)"Models/Fachada/Pared4.obj");
@@ -181,7 +181,20 @@ int main()
 	Model AguaBowl((char*)"Models/Bowl/aguaBowl.obj");
 	Model Lampara((char*)"Models/Lampara/lampara.obj");
 	Model Cajon((char*)"Models/Alacena/cajon.obj");
-	
+
+	//Segundo Piso
+	Model ParedA1Arriba((char*)"Models/Fachada/Pared1Arriba.obj");
+	Model ParedA2Arriba((char*)"Models/Fachada/Pared2Arriba.obj");
+	Model ParedA3Arriba((char*)"Models/Fachada/Pared3Arriba.obj");
+	Model ParedA4Arriba((char*)"Models/Fachada/Pared4Arriba.obj");
+	Model EntreTecho((char*)"Models/Fachada/EntreTecho.obj");
+	Model Sillon((char*)"Models/Sillon/sillonAzul.obj");
+	Model LamparaPiso((char*)"Models/Lampara/lamparaPiso.obj");
+	Model Portarretrato((char*)"Models/Portarretrato/photoframe.obj");
+	Model Escaleras((char*)"Models/Escaleras/escaleras.obj");
+
+
+
 
 
 	// Set up vertex data (and buffer(s)) and attribute pointers
@@ -533,7 +546,6 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		AlacenaVertical.Draw(lightingShader);
 
-	
 		//Reloj
 		model = glm::mat4(1);
 		tmp = model = glm::translate(model, glm::vec3(4.5f, 4.0f, -8.7f));
@@ -573,7 +585,7 @@ int main()
 
 		//Lampara 
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(0.0f, 6.5, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, 6.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.Draw(lightingShader);
 		
@@ -586,6 +598,67 @@ int main()
 		model = glm::mat4(1);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		TejaEntrada.Draw(lightingShader);
+
+		//*****************************************Segundo Piso 
+		
+		//ParedA1
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		ParedA1Arriba.Draw(lightingShader);
+
+		//ParedA2
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		ParedA2Arriba.Draw(lightingShader);
+
+		//ParedA3
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		ParedA3Arriba.Draw(lightingShader);
+
+		//ParedA4
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		ParedA4Arriba.Draw(lightingShader);
+
+		//Entretecho
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		EntreTecho.Draw(lightingShader);
+
+		//Escaleras
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Escaleras.Draw(lightingShader);
+
+		//Escaleras
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Escaleras.Draw(lightingShader);
+
+		//Sillon
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Sillon.Draw(lightingShader);
+
+		//LamparaPiso
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		LamparaPiso.Draw(lightingShader);
+
+		//AlacenaHorizontal
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(0.0f, 6.8f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		AlacenaCajones.Draw(lightingShader);
+
+		//Portarretrato
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Portarretrato.Draw(lightingShader);
+
+
 
 		glBindVertexArray(0);
 		
@@ -687,21 +760,16 @@ void animacion() {
 
 	if (animPuerta)
 	{
-		if (rotPuerta > 0.0f) {
-			rotPuerta -= 0.1f;
-		}
-		else {
-			animPuerta = false;
+		if (rotPuerta < 27.0f){
+			rotPuerta += 0.1f;
 		}
 	}
 	else
 	{
-		if (rotPuerta < 27.0f) {
-			rotPuerta += 0.1f;
+		if (rotPuerta > 0.0f) {
+			rotPuerta -= 0.1f;
 		}
-		else {
-			animPuerta = true;
-		}
+
 	}
 
 	if (animReloj)
@@ -709,31 +777,17 @@ void animacion() {
 		if (rotManecilla >= 0.0f) {
 			rotManecilla += 0.04f;
 		}
-		else {
-			rotManecilla = false;
-		}
+
 	}
 
 	if (animLampara)
 	{
-		if (rotLampara > 0.0f) {
-
-			rotLampara -= 0.05f;
-			lightCampana = glm::vec3(1.0f, 1.0f, 0.0f);
-		}
-		else {
-			animLampara = false;
-		}
+		lightCampana = glm::vec3(1.0f, 1.0f, 0.0f);
 	}
 	else
 	{
-		if (rotLampara < 5.0f) {
-			rotLampara += 0.04f;
-			lightCampana = glm::vec3(0.0f, 0.0f, 0.0f);
-		}
-		else {
-			animLampara = true;
-		}
+		lightCampana = glm::vec3(0.0f, 0.0f, 0.0f);
+		
 	}
 
 	if (animCajon)
@@ -741,17 +795,11 @@ void animacion() {
 		if (transCajon > 0.0f) {
 			transCajon -= 0.0005f;
 		}
-		else {
-			animCajon = false;
-		}
 	}
 	else
 	{
 		if (transCajon < 0.10f) {
 			transCajon += 0.0005f;
-		}
-		else {
-			animCajon = true;
 		}
 	}
 
@@ -837,6 +885,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		}
 	}
 
+
 	
 }
 
@@ -889,5 +938,39 @@ void DoMovement()
 	{
 		camera.ProcessKeyboard(RIGHT, deltaTime);
 	}
+	//Abrir puerta principal y puertas de alacenas
+	if (keys[GLFW_KEY_P])
+	{
+		animPuerta = true;
+	}
+	//Cerrar puerta principal y puertas de alacenas
+	if (keys[GLFW_KEY_O])
+	{
+		animPuerta = false;
+	}
+	//Prender luz
+	if (keys[GLFW_KEY_L])
+	{
+		animLampara = true;
+	}
+	//Apagar luz
+	if (keys[GLFW_KEY_K])
+	{
+		animLampara = false;
+	}
+
+	//Abrir cajón
+	if (keys[GLFW_KEY_M])
+	{
+		animCajon = true;
+	}
+
+	//Abrir cajón
+	if (keys[GLFW_KEY_N])
+	{
+		animCajon = false;
+	}
 
 }
+
+
